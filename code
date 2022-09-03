@@ -1,0 +1,216 @@
+#include<stdio.h>
+#include<stdlib.h>
+#include<string.h>
+#include<time.h>
+// structure for node in LL
+FILE *fp;
+struct node{
+	int index;
+	char task_name[100];
+	struct node *next;
+}*first = NULL;
+
+void curr_time()
+{
+	time_t curtime;
+    time(&curtime);
+    printf("%s", ctime(&curtime));
+}
+
+void interface()
+{
+    system("color F0");
+    printf("\n\n\n\n");
+    printf("\t~~~~~~~~~~~~~~~~~~~~~"
+           "~~~~~~~~~~~~~~~~~~~~~~~~"
+           "~~~~~~~~~~~~~~~~~~~~~~~~"
+           "~~~~~~~~~~~~~~~~~~~~~~~"
+           "~~~~~~~~~~\n");
+    printf("\t~~~~~~~~~~~~~~~~~~~~~~"
+           "~~~~~~~~~~~~~~~~~~~~~~~"
+           "~~~~~~~~~~~~~~~~~~~~~~~"
+           "~~~~~~~~~~~~~~~~~~~~~~~~"
+           "~~~~~~~~~~\n\n");
+    printf("\t} : } : } : } : } : } "
+           ": } : } : } :   "
+           "WELCOME TO the TODO APP "
+           "     : { : { : { : { : { "
+           ": { : { : { : {\n\n");
+    printf("\t~~~~~~~~~~~~~~~~~~~~~"
+           "~~~~~~~~~~~~~~~~~~~~~~~~"
+           "~~~~~~~~~~~~~~~~~~~~~~~~~"
+           "~~~~~~~~~~~~~~~~~~~~~~"
+           "~~~~~~~~~~\n");
+    printf("\t~~~~~~~~~~~~~~~~~~~~~~"
+           "~~~~~~~~~~~~~~~~~~~~~~~"
+           "~~~~~~~~~~~~~~~~~~~~~~~"
+           "~~~~~~~~~~~~~~~~~~~~~~~~"
+           "~~~~~~~~~~\n");
+    printf("\n\n\n\t\t\t\t\t\t\t\t\t\t\t");
+    system("pause");
+}
+
+void see_todo()
+{
+	system("cls");
+	curr_time();
+	struct node* temp;
+    temp = first;
+	if (first == NULL)
+        printf("\n\nEmpty ToDo \n\n");
+    while (temp != NULL) {
+    	
+    	printf("\t\t\t| %d. ",temp->index);
+        printf("| %s",temp->task_name);
+        temp = temp->next;
+    }
+    printf("\n\n\n");
+    system("pause");
+}
+
+void count()
+{
+    
+    struct node* temp;
+    int i = 1;
+    temp = first;
+
+    while (temp != NULL) {
+        temp->index = i;
+        i++;
+        temp = temp->next;
+    }
+}
+
+//function to add the tasks
+struct node* add(char task[100], struct node *curr)
+{
+	struct node *temp, *new_task;
+	temp = curr;
+	if(first == NULL)
+	{
+		first = (struct node*)malloc(sizeof(struct node));
+		strcpy(first->task_name,task);
+		first->next = NULL;
+		temp = first;
+		first->index = 1;
+		
+	}
+	else
+	{
+		new_task = (struct node*)malloc(sizeof(struct node));
+		strcpy(new_task->task_name,task);
+		temp->next =  new_task;
+		new_task->next = NULL;
+		temp = new_task;
+	}
+	count();
+	return temp;
+	
+}
+
+// function to copy tasks from the file into the LL
+struct node* add_prev_tasks()
+{
+	char prev_task[100];
+	struct node *temp;
+	temp = first;
+	fp = fopen("task.txt","r");
+	while(fgets(prev_task,100,fp) != NULL)
+	{
+		temp = add(prev_task,temp);
+	}
+	fclose(fp);
+	return temp;
+}
+
+void update_file()
+{
+	fp = fopen("task.txt","w");
+    struct node* temp;
+    temp = first;
+    if (first == NULL)
+        return;
+    while (temp != NULL) {
+        fprintf(fp,"%s",temp->task_name);
+        temp = temp->next;
+    }
+    fclose(fp);
+}
+
+void deletetodo()
+{
+	system("cls");
+	int n,i;
+	struct node *prev, *temp;
+	
+	if(first == NULL)
+		printf("\n\nThere are no ToDos for today\n\n");
+	else{
+		printf("Enter the task you want to remove : ");
+		scanf("%d",&n);
+		if(n == 1)
+		{
+			temp = first;
+			first = first->next;
+			free(temp);
+		}
+		else{
+		temp = first;
+		for(i=1;i<n;i++)
+		{
+			prev = temp;
+			temp = temp->next;
+		}
+		prev->next = temp->next;
+		free(temp);
+		}
+		count();
+	}
+}
+
+
+int main()
+{
+	interface();
+	struct node *current;
+	current = add_prev_tasks();
+	int choice;
+	while(1)
+	{
+		system("cls");
+		curr_time();
+		printf("1. To see your ToDo list\n");
+        printf("2. To create new ToDo\n");
+        printf("3. To delete your ToDo\n");
+        printf("4. Exit");
+        printf("\n\n\nEnter your choice\t:\t");
+		scanf("%d",&choice);
+		switch(choice)
+		{
+			case 1: see_todo();break;
+			case 2:{
+				printf("Enter your task : ");
+				fflush(stdin);
+				char curr_task[100];
+				gets(curr_task);
+				strcat(curr_task,"\n");
+				current = add(curr_task,current);
+				break;
+			}
+			case 3: deletetodo();break;
+			case 4: {
+				update_file();
+				exit(1);
+				break;
+			}
+			default:{
+				printf("\nInvalid Choice \n");
+				system("pause");
+			}
+		}
+	}
+	update_file();
+    return 0;
+}
+
